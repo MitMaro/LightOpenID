@@ -67,11 +67,20 @@ class LightOpenID
         'pref/timezone'           => 'timezone',
         );
 
-    function __construct($data = null)
+    function __construct($data = null, $trustRoot = null, $returnUrl = null)
     {
-        $this->trustRoot = (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-        $uri = rtrim(preg_replace('#((?<=\?)|&)openid\.[^&]+#', '', $_SERVER['REQUEST_URI']), '?');
-        $this->returnUrl = $this->trustRoot . $uri;
+        if (is_null($trustRoot)) {
+            $this->trustRoot = (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+        } else {
+            $this->trustRoot = $trustRoot;
+        }
+        
+        if (is_null($returnUrl)) {
+            $uri = rtrim(preg_replace('#((?<=\?)|&)openid\.[^&]+#', '', $_SERVER['REQUEST_URI']), '?');
+            $this->returnUrl = $this->trustRoot . $uri;
+        } else {
+            $this->returnUrl = $returnUrl;
+        }
         
         // if not data was provided, use the GET and POST super global
         if (is_null($this->data)) {
