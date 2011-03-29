@@ -67,13 +67,18 @@ class LightOpenID
         'pref/timezone'           => 'timezone',
         );
 
-    function __construct()
+    function __construct($data = null)
     {
         $this->trustRoot = (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
         $uri = rtrim(preg_replace('#((?<=\?)|&)openid\.[^&]+#', '', $_SERVER['REQUEST_URI']), '?');
         $this->returnUrl = $this->trustRoot . $uri;
-
-        $this->data = $_POST + $_GET; # OPs may send data as POST or GET.
+        
+        // if not data was provided, use the GET and POST super global
+        if (is_null($this->data)) {
+            $this->data = $_POST + $_GET;
+        } else {
+            $this->data = $data;
+        }
 
         if(!function_exists('curl_init') && !in_array('https', stream_get_wrappers())) {
             throw new ErrorException('You must have either https wrappers or curl enabled.');
